@@ -4,112 +4,183 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <style>
   :root {
-    --bg: #f6f5f2;
-    --surface: #ffffff;
-    --border: #e3e1da;
-    --border-strong: #cfccc1;
-    --text: #22221f;
-    --text-secondary: #6b6a63;
-    --text-muted: #9b9a91;
-    --accent: #3c3489;
-    --accent-bg: #eeedfe;
-    --accent-text: #26215c;
-    --danger: #d85a30;
-    --danger-bg: #fae7e0;
-    --success: #0f6e56;
-    --radius: 10px;
-    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --bg: #f6f4ee;
+    --surface: #fffefb;
+    --border: #e6e2d6;
+    --border-strong: #d1cbb8;
+    --text: #2b2a24;
+    --text-secondary: #6e6b5c;
+    --text-muted: #9c987f;
+    --accent: #5f6b45;
+    --accent-2: #7c8a5c;
+    --accent-bg: #eaeadd;
+    --accent-text: #454e30;
+    --danger: #a15b3f;
+    --danger-bg: #f3e6de;
+    --success: #4f7355;
+    --success-bg: #e8efe4;
+    --radius: 14px;
+    --shadow: 0 1px 2px rgba(50,45,20,0.03), 0 4px 16px rgba(50,45,20,0.05);
+    --shadow-hover: 0 2px 6px rgba(50,45,20,0.05), 0 10px 24px rgba(50,45,20,0.07);
+    --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-display: "Fraunces", Georgia, "Times New Roman", serif;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #1b1b19; --surface: #242422; --border: #38372f; --border-strong: #4a4940;
-      --text: #f0efe9; --text-secondary: #b3b1a6; --text-muted: #85837a;
-      --accent: #a89ef0; --accent-bg: #322c5e; --accent-text: #d6d2f7;
-      --danger: #e88a68; --danger-bg: #4a271a; --success: #6fcbaa;
+      --bg: #1a1a16; --surface: #232319; --border: #34331f; --border-strong: #46442c;
+      --text: #efeee5; --text-secondary: #b6b3a1; --text-muted: #837f6b;
+      --accent: #a9b78a; --accent-2: #c2cea3; --accent-bg: #2a2c1e; --accent-text: #cbd5ac;
+      --danger: #d29273; --danger-bg: #362720; --success: #8bb28e; --success-bg: #1f2b20;
+      --shadow: 0 1px 2px rgba(0,0,0,0.2), 0 4px 14px rgba(0,0,0,0.24);
+      --shadow-hover: 0 2px 6px rgba(0,0,0,0.24), 0 8px 22px rgba(0,0,0,0.3);
     }
   }
   * { box-sizing: border-box; }
-  body { margin: 0; font-family: var(--font); background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
-  #app { max-width: 640px; margin: 0 auto; padding: 20px 16px 80px; }
-  header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 18px; }
-  h1 { font-size: 20px; font-weight: 600; margin: 0; }
-  #sync-status { font-size: 12px; color: var(--text-muted); }
-  nav { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 4px; margin-bottom: 18px; position: sticky; top: 12px; z-index: 5; flex-wrap: wrap; }
-  nav button { flex: 1; min-width: 70px; border: none; background: transparent; padding: 9px 4px; font-size: 13.5px; font-weight: 500; color: var(--text-secondary); border-radius: 7px; cursor: pointer; font-family: inherit; }
-  nav button.active { background: var(--accent-bg); color: var(--accent-text); }
-  .panel { display: none; }
+  body { margin: 0; font-family: var(--font); background: radial-gradient(ellipse 900px 500px at 50% -10%, var(--accent-bg) 0%, transparent 60%), var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; min-height: 100vh; }
+  #app { max-width: 640px; margin: 0 auto; padding: 22px 16px 80px; }
+  header { margin-bottom: 20px; }
+  .greeting { font-size: 13px; color: var(--text-muted); margin-bottom: 3px; letter-spacing: 0.02em; }
+  h1 { font-family: var(--font-display); font-size: 30px; font-weight: 500; margin: 0; letter-spacing: -0.01em; }
+  #sync-status { font-size: 12px; color: var(--text-muted); display: inline-flex; align-items: center; gap: 5px; margin-top: 5px; }
+  #sync-status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--success); display: inline-block; }
+  nav { display: flex; gap: 3px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 4px; margin-bottom: 20px; position: sticky; top: 12px; z-index: 5; flex-wrap: wrap; box-shadow: var(--shadow); }
+  nav button { flex: 1; min-width: 62px; border: none; background: transparent; padding: 11px 4px; font-size: 12.5px; font-weight: 600; color: var(--text-secondary); border-radius: 12px; cursor: pointer; font-family: inherit; transition: background 0.15s, color 0.15s; }
+  nav button.active { background: var(--accent); color: #fff; }
+  nav button:not(.active):hover { background: var(--accent-bg); color: var(--accent-text); }
+  .panel { display: none; animation: fadeIn 0.2s ease; }
   .panel.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
   input[type=text], input[type=date], input[type=time], input[type=url], select, textarea {
-    font-family: inherit; font-size: 14px; padding: 9px 11px; border: 1px solid var(--border-strong);
-    border-radius: 8px; background: var(--surface); color: var(--text); width: 100%;
+    font-family: inherit; font-size: 14px; padding: 10px 12px; border: 1px solid var(--border-strong);
+    border-radius: 10px; background: var(--surface); color: var(--text); width: 100%; transition: border-color 0.15s;
   }
-  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
-  button.primary { background: var(--accent); color: #fff; border: none; padding: 9px 16px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; white-space: nowrap; font-family: inherit; }
-  button.primary:active { transform: scale(0.98); }
-  button.secondary { background: transparent; border: 1px solid var(--border-strong); color: var(--text); padding: 8px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: inherit; }
-  .item { display: flex; align-items: flex-start; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; margin-bottom: 8px; }
-  .item.done { opacity: 0.55; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); }
+  button.primary { background: var(--accent); color: #fff; border: none; padding: 10px 18px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; font-family: inherit; transition: transform 0.1s, background 0.15s; }
+  button.primary:hover { background: var(--accent-2); }
+  button.primary:active { transform: scale(0.97); }
+  button.secondary { background: var(--surface); border: 1px solid var(--border-strong); color: var(--text); padding: 9px 14px; border-radius: 10px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; transition: background 0.15s, border-color 0.15s; }
+  button.secondary:hover { border-color: var(--accent); color: var(--accent-text); }
+  .item { display: flex; align-items: flex-start; gap: 11px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 13px; margin-bottom: 8px; box-shadow: var(--shadow); transition: box-shadow 0.15s, transform 0.15s; }
+  .item:hover { box-shadow: var(--shadow-hover); transform: translateY(-1px); }
+  .item.done { opacity: 0.5; }
   .item.done .item-title { text-decoration: line-through; }
-  .checkbox { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--border-strong); flex-shrink: 0; margin-top: 1px; cursor: pointer; display: flex; align-items: center; justify-content: center; background: var(--surface); }
+  .checkbox { width: 21px; height: 21px; border-radius: 50%; border: 1.5px solid var(--border-strong); flex-shrink: 0; margin-top: 1px; cursor: pointer; display: flex; align-items: center; justify-content: center; background: var(--surface); transition: all 0.15s; }
+  .checkbox:hover { border-color: var(--accent); }
   .checkbox.checked { background: var(--success); border-color: var(--success); color: #fff; font-size: 12px; }
   .item-body { flex: 1; min-width: 0; }
   .item-title { font-size: 14.5px; font-weight: 500; word-break: break-word; }
-  .item-meta { font-size: 12px; color: var(--text-muted); margin-top: 3px; display: flex; gap: 8px; flex-wrap: wrap; }
-  .item-meta a { color: var(--accent); text-decoration: none; }
-  .del-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; padding: 2px 4px; line-height: 1; flex-shrink: 0; }
-  .del-btn:hover { color: var(--danger); }
-  .empty { text-align: center; color: var(--text-muted); font-size: 14px; padding: 40px 20px; }
-  .section-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin: 20px 0 8px; }
+  .item-meta { font-size: 12px; color: var(--text-muted); margin-top: 4px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .item-meta a { color: var(--accent); text-decoration: none; font-weight: 500; }
+  .del-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 17px; padding: 2px 4px; line-height: 1; flex-shrink: 0; border-radius: 6px; transition: color 0.15s, background 0.15s; }
+  .del-btn:hover { color: var(--danger); background: var(--danger-bg); }
+  .empty { text-align: center; color: var(--text-muted); font-size: 14px; font-family: var(--font-display); font-style: italic; padding: 44px 20px; }
+  .section-label { font-family: var(--font-display); font-size: 13px; font-weight: 500; font-style: italic; letter-spacing: 0.01em; color: var(--text-secondary); margin: 24px 0 10px; }
   .section-label:first-child { margin-top: 0; }
-  .goal-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 10px; }
-  .goal-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
-  .goal-why { font-size: 13px; color: var(--text-secondary); margin-bottom: 10px; }
-  .progress-track { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin-bottom: 6px; }
-  .progress-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.2s; }
+  .goal-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 10px; box-shadow: var(--shadow); transition: box-shadow 0.15s; }
+  .goal-card:hover { box-shadow: var(--shadow-hover); }
+  .goal-title { font-family: var(--font-display); font-size: 18px; font-weight: 500; margin-bottom: 4px; }
+  .goal-why { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.4; }
+  .progress-track { height: 7px; background: var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 7px; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: 4px; transition: width 0.3s; }
   .goal-footer { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-muted); }
-  .doc-icon { width: 32px; height: 32px; border-radius: 7px; background: var(--accent-bg); color: var(--accent-text); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex-shrink: 0; }
-  .form-grid { display: flex; flex-direction: column; gap: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; margin-bottom: 16px; }
+  .doc-icon { width: 34px; height: 34px; border-radius: 9px; background: var(--accent-bg); color: var(--accent-text); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+  .form-grid { display: flex; flex-direction: column; gap: 9px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 18px; box-shadow: var(--shadow); }
   .form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
-  .priority-tag { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 5px; }
+  .priority-tag { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; }
   .p-high { background: var(--danger-bg); color: var(--danger); }
   .p-med { background: var(--accent-bg); color: var(--accent-text); }
   .p-low { background: var(--border); color: var(--text-secondary); }
-  .note { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5; }
-  .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-  .cal-header button { background: var(--surface); border: 1px solid var(--border-strong); border-radius: 8px; width: 32px; height: 32px; font-size: 16px; cursor: pointer; color: var(--text); }
-  .cal-month-label { font-size: 15px; font-weight: 600; }
-  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 18px; }
-  .cal-dow { text-align: center; font-size: 11px; color: var(--text-muted); font-weight: 600; padding-bottom: 4px; }
-  .cal-day { aspect-ratio: 1; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 13px; cursor: pointer; position: relative; color: var(--text); }
+  .reminder-tag { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; background: var(--success-bg); color: var(--success); display: inline-flex; align-items: center; gap: 3px; }
+  .note { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.55; }
+  .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .cal-header button { background: var(--surface); border: 1px solid var(--border-strong); border-radius: 10px; width: 34px; height: 34px; font-size: 17px; cursor: pointer; color: var(--text); transition: background 0.15s; }
+  .cal-header button:hover { background: var(--accent-bg); border-color: var(--accent); color: var(--accent-text); }
+  .cal-month-label { font-size: 15.5px; font-weight: 700; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 20px; }
+  .cal-dow { text-align: center; font-size: 11px; color: var(--text-muted); font-weight: 700; padding-bottom: 5px; }
+  .cal-day { aspect-ratio: 1; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 13px; cursor: pointer; position: relative; color: var(--text); transition: all 0.15s; }
+  .cal-day:not(.empty-day):hover { border-color: var(--accent); }
   .cal-day.empty-day { border: none; background: transparent; cursor: default; }
-  .cal-day.today { border-color: var(--accent); font-weight: 700; }
-  .cal-day.selected { background: var(--accent-bg); border-color: var(--accent); color: var(--accent-text); }
+  .cal-day.today { border-color: var(--accent); font-weight: 700; color: var(--accent-text); }
+  .cal-day.selected { background: var(--accent); border-color: var(--accent); color: #fff; }
   .cal-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); margin-top: 2px; }
-  .cal-day.selected .cal-dot { background: var(--accent-text); }
+  .cal-day.selected .cal-dot, .cal-day.today.selected .cal-dot { background: #fff; }
   .backup-row { display: flex; gap: 8px; margin-bottom: 16px; }
   .backup-row button { flex: 1; }
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .toggle-switch { position: relative; width: 42px; height: 24px; flex-shrink: 0; }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider { position: absolute; inset: 0; background: var(--border-strong); border-radius: 24px; cursor: pointer; transition: background 0.15s; }
+  .toggle-slider::before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform 0.15s; }
+  .toggle-switch input:checked + .toggle-slider { background: var(--success); }
+  .toggle-switch input:checked + .toggle-slider::before { transform: translateX(18px); }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px; box-shadow: var(--shadow); position: relative; overflow: hidden; }
+  .stat-label { font-size: 11px; font-weight: 600; letter-spacing: 0.03em; color: var(--text-muted); margin-bottom: 8px; }
+  .stat-number { font-family: var(--font-display); font-size: 34px; font-weight: 500; line-height: 1; }
+  .stat-sub { font-size: 12px; color: var(--text-muted); margin-top: 5px; }
+  .stat-card.stat-danger .stat-number { color: var(--danger); }
+  .stat-card.stat-accent .stat-number { color: var(--accent); }
+  .stat-card.stat-success .stat-number { color: var(--success); }
+  .dash-section-title { font-family: var(--font-display); font-size: 17px; font-weight: 500; margin: 4px 0 10px; }
   #import-file, #import-ics-file { display: none; }
 </style>
 </head>
 <body>
 <div id="app">
   <header>
+    <div class="greeting" id="greeting"></div>
     <h1>My hub</h1>
     <span id="sync-status">on this device</span>
   </header>
 
   <nav>
-    <button class="tab-btn active" data-tab="tasks">Tasks</button>
+    <button class="tab-btn active" data-tab="dashboard">Home</button>
+    <button class="tab-btn" data-tab="tasks">Tasks</button>
     <button class="tab-btn" data-tab="goals">Goals</button>
     <button class="tab-btn" data-tab="calendar">Calendar</button>
-    <button class="tab-btn" data-tab="docs">Documents</button>
+    <button class="tab-btn" data-tab="docs">Docs</button>
     <button class="tab-btn" data-tab="settings">Sync</button>
   </nav>
 
+  <!-- DASHBOARD -->
+  <div class="panel active" id="panel-dashboard">
+    <div class="stat-grid">
+      <div class="stat-card stat-accent">
+        <div class="stat-label">Active tasks</div>
+        <div class="stat-number" id="stat-active">0</div>
+        <div class="stat-sub">total open</div>
+      </div>
+      <div class="stat-card stat-danger">
+        <div class="stat-label">Overdue</div>
+        <div class="stat-number" id="stat-overdue">0</div>
+        <div class="stat-sub">need attention</div>
+      </div>
+      <div class="stat-card stat-accent">
+        <div class="stat-label">Due this week</div>
+        <div class="stat-number" id="stat-week">0</div>
+        <div class="stat-sub">upcoming</div>
+      </div>
+      <div class="stat-card stat-success">
+        <div class="stat-label">Goals in progress</div>
+        <div class="stat-number" id="stat-goals">0</div>
+        <div class="stat-sub">objectives</div>
+      </div>
+    </div>
+    <div class="dash-section-title">Overdue</div>
+    <div id="dash-overdue"></div>
+    <div class="dash-section-title" style="margin-top:18px;">Due this week</div>
+    <div id="dash-week"></div>
+  </div>
+
   <!-- TASKS -->
-  <div class="panel active" id="panel-tasks">
+  <div class="panel" id="panel-tasks">
     <div class="form-grid">
       <input type="text" id="task-title" placeholder="What needs doing?">
       <div style="display:flex; gap:8px;">
@@ -154,6 +225,13 @@
         <input type="date" id="event-date" style="flex:1;">
         <input type="time" id="event-time" style="flex:1;">
       </div>
+      <select id="event-reminder">
+        <option value="">No reminder</option>
+        <option value="0">At the time</option>
+        <option value="15">15 minutes before</option>
+        <option value="60" selected>1 hour before</option>
+        <option value="1440">1 day before</option>
+      </select>
       <div class="form-actions"><button class="primary" id="add-event-btn">Add event</button></div>
     </div>
     <p class="note">Export your calendar as a .ics file from Google, Outlook, or Apple Calendar, then import it here to pull those events in. Re-importing the same file won't create duplicates.</p>
@@ -187,6 +265,24 @@
   <!-- SETTINGS / SYNC -->
   <div class="panel" id="panel-settings">
     <p class="note">This app has no account and no server — everything lives only in this browser, on this device. To use it on both your iPhone and laptop, export your data here, save the file into OneDrive, then open the same file with Import on the other device. Do this after making changes on either device to keep them lined up.</p>
+    <div class="form-grid">
+      <div class="toggle-row">
+        <div>
+          <div style="font-weight:600; font-size:14px;">Push reminders</div>
+          <p class="note" style="margin:2px 0 0;" id="reminder-status">Set up your push connection below, then turn this on.</p>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="reminder-toggle">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+    <div class="form-grid">
+      <p class="note" style="margin-bottom:0;">Paste your OneSignal App ID and REST API Key (from Settings &gt; Keys &amp; IDs in your OneSignal account) to enable real reminders that reach your phone and laptop, even when the hub isn't open.</p>
+      <input type="text" id="onesignal-appid-input" placeholder="OneSignal App ID">
+      <input type="text" id="onesignal-key-input" placeholder="OneSignal REST API Key">
+      <div class="form-actions"><button class="primary" id="save-onesignal-btn">Save</button></div>
+    </div>
     <div class="form-grid">
       <p class="note" style="margin-bottom:0;">Paste the Client ID from your Azure app registration to enable Outlook calendar sync.</p>
       <input type="text" id="client-id-input" placeholder="Application (client) ID">
@@ -235,6 +331,42 @@ function saveData() {
   }
 }
 
+// ---------- DASHBOARD ----------
+function renderDashboard() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const weekEnd = new Date(today); weekEnd.setDate(weekEnd.getDate() + 7);
+
+  const openTasks = data.tasks.filter(t => !t.done);
+  const overdue = openTasks.filter(t => t.due && new Date(t.due + 'T00:00:00') < today);
+  const dueThisWeek = openTasks.filter(t => {
+    if (!t.due) return false;
+    const d = new Date(t.due + 'T00:00:00');
+    return d >= today && d <= weekEnd;
+  });
+  const goalsInProgress = data.goals.length;
+
+  document.getElementById('stat-active').textContent = openTasks.length;
+  document.getElementById('stat-overdue').textContent = overdue.length;
+  document.getElementById('stat-week').textContent = dueThisWeek.length;
+  document.getElementById('stat-goals').textContent = goalsInProgress;
+
+  const overdueEl = document.getElementById('dash-overdue');
+  overdueEl.innerHTML = overdue.length ? overdue.sort((a,b) => a.due.localeCompare(b.due)).map(taskHtml).join('') : '<div class="empty">Nothing overdue.</div>';
+  const weekEl = document.getElementById('dash-week');
+  weekEl.innerHTML = dueThisWeek.length ? dueThisWeek.sort((a,b) => a.due.localeCompare(b.due)).map(taskHtml).join('') : '<div class="empty">Nothing due this week.</div>';
+
+  overdueEl.querySelectorAll('.task-check').forEach(el => { el.onclick = () => { const t = data.tasks.find(x => x.id === el.dataset.id); if (t) { t.done = !t.done; if (t.done && t.pushId) cancelPush(t.pushId); saveData(); renderTasks(); renderDashboard(); } }; });
+  overdueEl.querySelectorAll('.task-del').forEach(el => { el.onclick = () => { const t = data.tasks.find(x => x.id === el.dataset.id); if (t && t.pushId) cancelPush(t.pushId); data.tasks = data.tasks.filter(x => x.id !== el.dataset.id); saveData(); renderTasks(); renderDashboard(); }; });
+  weekEl.querySelectorAll('.task-check').forEach(el => { el.onclick = () => { const t = data.tasks.find(x => x.id === el.dataset.id); if (t) { t.done = !t.done; if (t.done && t.pushId) cancelPush(t.pushId); saveData(); renderTasks(); renderDashboard(); } }; });
+  weekEl.querySelectorAll('.task-del').forEach(el => { el.onclick = () => { const t = data.tasks.find(x => x.id === el.dataset.id); if (t && t.pushId) cancelPush(t.pushId); data.tasks = data.tasks.filter(x => x.id !== el.dataset.id); saveData(); renderTasks(); renderDashboard(); }; });
+}
+
+function renderGreeting() {
+  const h = new Date().getHours();
+  const greet = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('greeting').textContent = greet;
+}
+
 function escapeHtml(str) {
   const d = document.createElement('div');
   d.textContent = str;
@@ -257,10 +389,10 @@ function renderTasks() {
   openEl.innerHTML = open.length ? open.map(taskHtml).join('') : '<div class="empty">No open tasks. Add one above.</div>';
   doneEl.innerHTML = done.length ? done.map(taskHtml).join('') : '<div class="empty">Nothing completed yet.</div>';
   document.querySelectorAll('.task-check').forEach(el => {
-    el.onclick = () => { const t = data.tasks.find(x => x.id === el.dataset.id); if (t) { t.done = !t.done; saveData(); renderTasks(); } };
+    el.onclick = () => { const t = data.tasks.find(x => x.id === el.dataset.id); if (t) { t.done = !t.done; if (t.done && t.pushId) cancelPush(t.pushId); saveData(); renderTasks(); renderDashboard(); } };
   });
   document.querySelectorAll('.task-del').forEach(el => {
-    el.onclick = () => { data.tasks = data.tasks.filter(x => x.id !== el.dataset.id); saveData(); renderTasks(); };
+    el.onclick = () => { const t = data.tasks.find(x => x.id === el.dataset.id); if (t && t.pushId) cancelPush(t.pushId); data.tasks = data.tasks.filter(x => x.id !== el.dataset.id); saveData(); renderTasks(); renderDashboard(); };
   });
 }
 function taskHtml(t) {
@@ -275,16 +407,23 @@ function taskHtml(t) {
     <button class="del-btn task-del" data-id="${t.id}" aria-label="Delete task">&times;</button>
   </div>`;
 }
-document.getElementById('add-task-btn').onclick = () => {
+document.getElementById('add-task-btn').onclick = async () => {
   const titleEl = document.getElementById('task-title');
   const title = titleEl.value.trim();
   if (!title) { titleEl.style.borderColor = 'var(--danger)'; titleEl.placeholder = 'Enter a task first'; return; }
   const priority = document.getElementById('task-priority').value;
   const due = document.getElementById('task-due').value;
-  data.tasks.push({ id: uid(), title, priority, due, done: false, created: Date.now() });
+  const newTask = { id: uid(), title, priority, due, done: false, pushId: null, created: Date.now() };
+  data.tasks.push(newTask);
   titleEl.value = ''; titleEl.style.borderColor = '';
   document.getElementById('task-due').value = '';
-  saveData(); renderTasks(); renderCalendar();
+  saveData(); renderTasks(); renderCalendar(); renderDashboard();
+
+  if (due) {
+    const fireAt = new Date(due + 'T09:00:00');
+    const pushId = await schedulePush('Due today: ' + title, '', fireAt);
+    if (pushId) { newTask.pushId = pushId; saveData(); }
+  }
 };
 document.getElementById('task-title').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('add-task-btn').click(); });
 
@@ -395,11 +534,12 @@ function renderCalDay() {
   if (!tasks.length && !events.length) { el.innerHTML = '<div class="empty">Nothing scheduled this day.</div>'; return; }
   let html = '';
   events.sort((a,b) => (a.time||'').localeCompare(b.time||'')).forEach(e => {
-    html += `<div class="item"><div class="checkbox" style="visibility:hidden;"></div><div class="item-body"><div class="item-title">${escapeHtml(e.title)}</div><div class="item-meta">${e.time ? `<span>${e.time}</span>` : '<span>All day</span>'}</div></div><button class="del-btn event-del" data-id="${e.id}" aria-label="Delete event">&times;</button></div>`;
+    const reminderBadge = (e.reminderMinutes !== null && e.reminderMinutes !== undefined) ? `<span class="reminder-tag">${e.reminderMinutes === 0 ? 'At time' : e.reminderMinutes < 60 ? e.reminderMinutes + 'm before' : e.reminderMinutes < 1440 ? (e.reminderMinutes/60) + 'h before' : '1d before'}</span>` : '';
+    html += `<div class="item"><div class="checkbox" style="visibility:hidden;"></div><div class="item-body"><div class="item-title">${escapeHtml(e.title)}</div><div class="item-meta">${e.time ? `<span>${e.time}</span>` : '<span>All day</span>'}${reminderBadge}</div></div><button class="del-btn event-del" data-id="${e.id}" aria-label="Delete event">&times;</button></div>`;
   });
   tasks.forEach(t => { html += taskHtml(t); });
   el.innerHTML = html;
-  document.querySelectorAll('.event-del').forEach(elm => { elm.onclick = () => { data.events = data.events.filter(x => x.id !== elm.dataset.id); saveData(); renderCalendar(); }; });
+  document.querySelectorAll('.event-del').forEach(elm => { elm.onclick = () => { const ev = data.events.find(x => x.id === elm.dataset.id); if (ev && ev.pushId) cancelPush(ev.pushId); data.events = data.events.filter(x => x.id !== elm.dataset.id); saveData(); renderCalendar(); }; });
   document.querySelectorAll('.task-check').forEach(elx => { elx.onclick = () => { const t = data.tasks.find(x => x.id === elx.dataset.id); if (t) { t.done = !t.done; saveData(); renderTasks(); renderCalDay(); } }; });
   document.querySelectorAll('.task-del').forEach(elx => { elx.onclick = () => { data.tasks = data.tasks.filter(x => x.id !== elx.dataset.id); saveData(); renderTasks(); renderCalendar(); }; });
 }
@@ -407,14 +547,17 @@ function renderCalDay() {
 document.getElementById('cal-prev').onclick = () => { calViewDate.setMonth(calViewDate.getMonth() - 1); renderCalendar(); };
 document.getElementById('cal-next').onclick = () => { calViewDate.setMonth(calViewDate.getMonth() + 1); renderCalendar(); };
 
-document.getElementById('add-event-btn').onclick = () => {
+document.getElementById('add-event-btn').onclick = async () => {
   const titleEl = document.getElementById('event-title');
   const title = titleEl.value.trim();
   const dateEl = document.getElementById('event-date');
   if (!title) { titleEl.style.borderColor = 'var(--danger)'; titleEl.placeholder = 'Enter an event title first'; return; }
   if (!dateEl.value) { dateEl.style.borderColor = 'var(--danger)'; return; }
   const time = document.getElementById('event-time').value;
-  data.events.push({ id: uid(), title, date: dateEl.value, time, created: Date.now() });
+  const reminderEl = document.getElementById('event-reminder');
+  const reminderMinutes = reminderEl.value === '' ? null : Number(reminderEl.value);
+  const newEvent = { id: uid(), title, date: dateEl.value, time, reminderMinutes, pushId: null, created: Date.now() };
+  data.events.push(newEvent);
   titleEl.value = ''; titleEl.style.borderColor = '';
   dateEl.style.borderColor = '';
   const evDate = new Date(dateEl.value + 'T00:00:00');
@@ -422,7 +565,125 @@ document.getElementById('add-event-btn').onclick = () => {
   calViewDate = new Date(evDate.getFullYear(), evDate.getMonth(), 1);
   selectedDay = evDate;
   saveData(); renderCalendar();
+
+  if (reminderMinutes !== null) {
+    const eventTime = new Date(`${newEvent.date}T${newEvent.time || '09:00'}:00`);
+    const fireAt = new Date(eventTime.getTime() - reminderMinutes * 60000);
+    const pushId = await schedulePush(title, newEvent.time ? `Today at ${newEvent.time}` : 'Today', fireAt);
+    if (pushId) { newEvent.pushId = pushId; saveData(); }
+  }
 };
+
+// ---------- REMINDERS (OneSignal push) ----------
+const ONESIGNAL_APPID_KEY = 'my-hub-onesignal-appid';
+const ONESIGNAL_RESTKEY_KEY = 'my-hub-onesignal-restkey';
+const REMINDER_KEY = 'my-hub-reminders-enabled';
+let oneSignalReady = false;
+
+function getOneSignalCreds() {
+  return {
+    appId: localStorage.getItem(ONESIGNAL_APPID_KEY) || '',
+    restKey: localStorage.getItem(ONESIGNAL_RESTKEY_KEY) || ''
+  };
+}
+
+function remindersEnabled() { return localStorage.getItem(REMINDER_KEY) === '1'; }
+
+function updateReminderStatus() {
+  const statusEl = document.getElementById('reminder-status');
+  const toggle = document.getElementById('reminder-toggle');
+  const { appId } = getOneSignalCreds();
+  if (!appId) {
+    statusEl.textContent = 'Set up your push connection below, then turn this on.';
+    toggle.checked = false;
+    return;
+  }
+  const enabled = remindersEnabled();
+  toggle.checked = enabled;
+  statusEl.textContent = enabled
+    ? 'On — reminders will reach this device even when the hub is closed.'
+    : 'Off — turn on to allow push reminders on this device.';
+}
+
+document.getElementById('save-onesignal-btn').onclick = () => {
+  const appId = document.getElementById('onesignal-appid-input').value.trim();
+  const restKey = document.getElementById('onesignal-key-input').value.trim();
+  if (!appId || !restKey) return;
+  localStorage.setItem(ONESIGNAL_APPID_KEY, appId);
+  localStorage.setItem(ONESIGNAL_RESTKEY_KEY, restKey);
+  document.getElementById('last-export-note').textContent = 'Saved. Initializing push…';
+  initOneSignal();
+};
+(function prefillOneSignal() {
+  const { appId, restKey } = getOneSignalCreds();
+  if (appId) document.getElementById('onesignal-appid-input').value = appId;
+  if (restKey) document.getElementById('onesignal-key-input').value = restKey;
+})();
+
+function initOneSignal() {
+  const { appId } = getOneSignalCreds();
+  if (!appId || oneSignalReady) return;
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function (OneSignal) {
+    await OneSignal.init({ appId });
+    oneSignalReady = true;
+    updateReminderStatus();
+  });
+}
+initOneSignal();
+
+document.getElementById('reminder-toggle').onchange = async (e) => {
+  const { appId } = getOneSignalCreds();
+  if (!appId) { e.target.checked = false; return; }
+  if (e.target.checked) {
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function (OneSignal) {
+      await OneSignal.Notifications.requestPermission();
+      localStorage.setItem(REMINDER_KEY, '1');
+      updateReminderStatus();
+    });
+  } else {
+    localStorage.setItem(REMINDER_KEY, '0');
+    updateReminderStatus();
+  }
+};
+
+// Schedules a push notification via the OneSignal REST API. Returns the created notification's id (or null on failure).
+async function schedulePush(title, body, fireAtDate) {
+  const { appId, restKey } = getOneSignalCreds();
+  if (!appId || !restKey || !remindersEnabled()) return null;
+  if (fireAtDate.getTime() <= Date.now()) return null; // don't schedule things in the past
+  try {
+    const res = await fetch('https://onesignal.com/api/v1/notifications', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Basic ' + restKey },
+      body: JSON.stringify({
+        app_id: appId,
+        included_segments: ['Subscribed Users'],
+        headings: { en: title },
+        contents: { en: body },
+        send_after: fireAtDate.toUTCString()
+      })
+    });
+    const json = await res.json();
+    return json.id || null;
+  } catch (err) {
+    console.error('Push schedule failed', err);
+    return null;
+  }
+}
+
+// Cancels a previously scheduled push notification by id.
+async function cancelPush(notifId) {
+  const { appId, restKey } = getOneSignalCreds();
+  if (!appId || !restKey || !notifId) return;
+  try {
+    await fetch(`https://onesignal.com/api/v1/notifications/${notifId}?app_id=${appId}`, {
+      method: 'DELETE',
+      headers: { Authorization: 'Basic ' + restKey }
+    });
+  } catch (err) { console.error('Push cancel failed', err); }
+}
 
 // ---------- OUTLOOK CALENDAR SYNC ----------
 const CLIENT_ID_KEY = 'my-hub-msal-client-id';
@@ -635,7 +896,7 @@ document.getElementById('import-file').onchange = (e) => {
   e.target.value = '';
 };
 
-function renderAll() { renderTasks(); renderGoals(); renderDocs(); renderCalendar(); }
+function renderAll() { renderTasks(); renderGoals(); renderDocs(); renderCalendar(); renderGreeting(); updateReminderStatus(); renderDashboard(); }
 
 // TABS
 document.querySelectorAll('.tab-btn').forEach(btn => {
