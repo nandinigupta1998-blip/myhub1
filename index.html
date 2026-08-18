@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Hub</title>
+<style>
+  :root {
+    --bg: #f6f5f2;
+    --surface: #ffffff;
+    --border: #e3e1da;
+    --border-strong: #cfccc1;
+    --text: #22221f;
+    --text-secondary: #6b6a63;
+    --text-muted: #9b9a91;
+    --accent: #3c3489;
+    --accent-bg: #eeedfe;
+    --accent-text: #26215c;
+    --danger: #d85a30;
+    --danger-bg: #fae7e0;
+    --success: #0f6e56;
+    --radius: 10px;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1b1b19; --surface: #242422; --border: #38372f; --border-strong: #4a4940;
+      --text: #f0efe9; --text-secondary: #b3b1a6; --text-muted: #85837a;
+      --accent: #a89ef0; --accent-bg: #322c5e; --accent-text: #d6d2f7;
+      --danger: #e88a68; --danger-bg: #4a271a; --success: #6fcbaa;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: var(--font); background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
+  #app { max-width: 640px; margin: 0 auto; padding: 20px 16px 80px; }
+  header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 18px; }
+  h1 { font-size: 20px; font-weight: 600; margin: 0; }
+  #sync-status { font-size: 12px; color: var(--text-muted); }
+  nav { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 4px; margin-bottom: 18px; position: sticky; top: 12px; z-index: 5; flex-wrap: wrap; }
+  nav button { flex: 1; min-width: 70px; border: none; background: transparent; padding: 9px 4px; font-size: 13.5px; font-weight: 500; color: var(--text-secondary); border-radius: 7px; cursor: pointer; font-family: inherit; }
+  nav button.active { background: var(--accent-bg); color: var(--accent-text); }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  input[type=text], input[type=date], input[type=time], input[type=url], select, textarea {
+    font-family: inherit; font-size: 14px; padding: 9px 11px; border: 1px solid var(--border-strong);
+    border-radius: 8px; background: var(--surface); color: var(--text); width: 100%;
+  }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
+  button.primary { background: var(--accent); color: #fff; border: none; padding: 9px 16px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; white-space: nowrap; font-family: inherit; }
+  button.primary:active { transform: scale(0.98); }
+  button.secondary { background: transparent; border: 1px solid var(--border-strong); color: var(--text); padding: 8px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: inherit; }
+  .item { display: flex; align-items: flex-start; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; margin-bottom: 8px; }
+  .item.done { opacity: 0.55; }
+  .item.done .item-title { text-decoration: line-through; }
+  .checkbox { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--border-strong); flex-shrink: 0; margin-top: 1px; cursor: pointer; display: flex; align-items: center; justify-content: center; background: var(--surface); }
+  .checkbox.checked { background: var(--success); border-color: var(--success); color: #fff; font-size: 12px; }
+  .item-body { flex: 1; min-width: 0; }
+  .item-title { font-size: 14.5px; font-weight: 500; word-break: break-word; }
+  .item-meta { font-size: 12px; color: var(--text-muted); margin-top: 3px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .item-meta a { color: var(--accent); text-decoration: none; }
+  .del-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; padding: 2px 4px; line-height: 1; flex-shrink: 0; }
+  .del-btn:hover { color: var(--danger); }
+  .empty { text-align: center; color: var(--text-muted); font-size: 14px; padding: 40px 20px; }
+  .section-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin: 20px 0 8px; }
+  .section-label:first-child { margin-top: 0; }
+  .goal-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+  .goal-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  .goal-why { font-size: 13px; color: var(--text-secondary); margin-bottom: 10px; }
+  .progress-track { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin-bottom: 6px; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.2s; }
+  .goal-footer { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-muted); }
+  .doc-icon { width: 32px; height: 32px; border-radius: 7px; background: var(--accent-bg); color: var(--accent-text); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex-shrink: 0; }
+  .form-grid { display: flex; flex-direction: column; gap: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; margin-bottom: 16px; }
+  .form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
+  .priority-tag { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 5px; }
+  .p-high { background: var(--danger-bg); color: var(--danger); }
+  .p-med { background: var(--accent-bg); color: var(--accent-text); }
+  .p-low { background: var(--border); color: var(--text-secondary); }
+  .note { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5; }
+  .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .cal-header button { background: var(--surface); border: 1px solid var(--border-strong); border-radius: 8px; width: 32px; height: 32px; font-size: 16px; cursor: pointer; color: var(--text); }
+  .cal-month-label { font-size: 15px; font-weight: 600; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 18px; }
+  .cal-dow { text-align: center; font-size: 11px; color: var(--text-muted); font-weight: 600; padding-bottom: 4px; }
+  .cal-day { aspect-ratio: 1; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 13px; cursor: pointer; position: relative; color: var(--text); }
+  .cal-day.empty-day { border: none; background: transparent; cursor: default; }
+  .cal-day.today { border-color: var(--accent); font-weight: 700; }
+  .cal-day.selected { background: var(--accent-bg); border-color: var(--accent); color: var(--accent-text); }
+  .cal-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); margin-top: 2px; }
+  .cal-day.selected .cal-dot { background: var(--accent-text); }
+  .backup-row { display: flex; gap: 8px; margin-bottom: 16px; }
+  .backup-row button { flex: 1; }
+  #import-file, #import-ics-file { display: none; }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>My hub</h1>
+    <span id="sync-status">on this device</span>
+  </header>
+
+  <nav>
+    <button class="tab-btn active" data-tab="tasks">Tasks</button>
+    <button class="tab-btn" data-tab="goals">Goals</button>
+    <button class="tab-btn" data-tab="calendar">Calendar</button>
+    <button class="tab-btn" data-tab="docs">Documents</button>
+    <button class="tab-btn" data-tab="settings">Sync</button>
+  </nav>
+
+  <!-- TASKS -->
+  <div class="panel active" id="panel-tasks">
+    <div class="form-grid">
+      <input type="text" id="task-title" placeholder="What needs doing?">
+      <div style="display:flex; gap:8px;">
+        <select id="task-priority" style="flex:1;">
+          <option value="low">Low priority</option>
+          <option value="med" selected>Medium priority</option>
+          <option value="high">High priority</option>
+        </select>
+        <input type="date" id="task-due" style="flex:1;">
+      </div>
+      <div class="form-actions"><button class="primary" id="add-task-btn">Add task</button></div>
+    </div>
+    <div class="section-label">To do</div>
+    <div id="tasks-open"></div>
+    <div class="section-label">Done</div>
+    <div id="tasks-done"></div>
+  </div>
+
+  <!-- GOALS -->
+  <div class="panel" id="panel-goals">
+    <div class="form-grid">
+      <input type="text" id="goal-title" placeholder="Long-term objective (e.g. Run a marathon)">
+      <textarea id="goal-why" placeholder="Why does this matter? (optional)" rows="2"></textarea>
+      <div class="form-actions"><button class="primary" id="add-goal-btn">Add objective</button></div>
+    </div>
+    <div id="goals-list"></div>
+  </div>
+
+  <!-- CALENDAR -->
+  <div class="panel" id="panel-calendar">
+    <div class="form-grid" id="outlook-connect-block">
+      <p class="note" style="margin-bottom:0;">Connect your Outlook calendar to pull real events in automatically.</p>
+      <div class="backup-row">
+        <button class="secondary" id="outlook-connect-btn">Connect Outlook calendar</button>
+        <button class="secondary" id="outlook-sync-btn" style="display:none;">Sync now</button>
+      </div>
+      <p class="note" id="outlook-status" style="margin-bottom:0;"></p>
+    </div>
+    <div class="form-grid">
+      <input type="text" id="event-title" placeholder="Event title">
+      <div style="display:flex; gap:8px;">
+        <input type="date" id="event-date" style="flex:1;">
+        <input type="time" id="event-time" style="flex:1;">
+      </div>
+      <div class="form-actions"><button class="primary" id="add-event-btn">Add event</button></div>
+    </div>
+    <p class="note">Export your calendar as a .ics file from Google, Outlook, or Apple Calendar, then import it here to pull those events in. Re-importing the same file won't create duplicates.</p>
+    <div class="backup-row">
+      <button class="secondary" id="import-ics-btn">Import calendar file (.ics)</button>
+    </div>
+    <input type="file" id="import-ics-file" accept=".ics,text/calendar">
+    <p class="note" id="ics-import-note"></p>
+    <div class="cal-header">
+      <button id="cal-prev" aria-label="Previous month">&lsaquo;</button>
+      <span class="cal-month-label" id="cal-month-label"></span>
+      <button id="cal-next" aria-label="Next month">&rsaquo;</button>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+    <div class="section-label" id="cal-day-label">Today</div>
+    <div id="cal-day-items"></div>
+  </div>
+
+  <!-- DOCS -->
+  <div class="panel" id="panel-docs">
+    <p class="note">This stores links and notes for your documents, not the files themselves — keep the actual files in OneDrive (or wherever you store them) and paste the link here so everything's in one place.</p>
+    <div class="form-grid">
+      <input type="text" id="doc-title" placeholder="Document name">
+      <input type="url" id="doc-link" placeholder="Link (OneDrive, iCloud, Dropbox…) — optional">
+      <input type="text" id="doc-note" placeholder="Note — optional">
+      <div class="form-actions"><button class="primary" id="add-doc-btn">Add document</button></div>
+    </div>
+    <div id="docs-list"></div>
+  </div>
+
+  <!-- SETTINGS / SYNC -->
+  <div class="panel" id="panel-settings">
+    <p class="note">This app has no account and no server — everything lives only in this browser, on this device. To use it on both your iPhone and laptop, export your data here, save the file into OneDrive, then open the same file with Import on the other device. Do this after making changes on either device to keep them lined up.</p>
+    <div class="form-grid">
+      <p class="note" style="margin-bottom:0;">Paste the Client ID from your Azure app registration to enable Outlook calendar sync.</p>
+      <input type="text" id="client-id-input" placeholder="Application (client) ID">
+      <div class="form-actions"><button class="primary" id="save-client-id-btn">Save</button></div>
+    </div>
+    <div class="backup-row">
+      <button class="secondary" id="export-btn">Export data</button>
+      <button class="secondary" id="import-btn">Import data</button>
+    </div>
+    <input type="file" id="import-file" accept="application/json">
+    <p class="note" id="last-export-note"></p>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/msal-browser/3.7.1/msal-browser.min.js"></script>
+<script>
+const STORE_KEY = 'my-hub-data-v1';
+let data = { tasks: [], goals: [], docs: [], events: [] };
+let calViewDate = new Date();
+let selectedDay = new Date();
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function todayStr() { return new Date().toISOString().slice(0,10); }
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) {
+      data = JSON.parse(raw);
+      data.tasks = data.tasks || [];
+      data.goals = data.goals || [];
+      data.docs = data.docs || [];
+      data.events = data.events || [];
+    }
+  } catch (e) { console.error('Load failed', e); }
+  renderAll();
+}
+
+function saveData() {
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify(data));
+    document.getElementById('sync-status').textContent = 'saved on this device';
+  } catch (e) {
+    document.getElementById('sync-status').textContent = 'save failed';
+    console.error('Save failed', e);
+  }
+}
+
+function escapeHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+function fmtDate(d) {
+  if (!d) return '';
+  const dt = new Date(d + 'T00:00:00');
+  if (isNaN(dt)) return '';
+  return dt.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+// ---------- TASKS ----------
+function renderTasks() {
+  const openEl = document.getElementById('tasks-open');
+  const doneEl = document.getElementById('tasks-done');
+  const sorted = [...data.tasks].sort((a,b) => (a.due||'9999').localeCompare(b.due||'9999'));
+  const open = sorted.filter(t => !t.done);
+  const done = sorted.filter(t => t.done);
+  openEl.innerHTML = open.length ? open.map(taskHtml).join('') : '<div class="empty">No open tasks. Add one above.</div>';
+  doneEl.innerHTML = done.length ? done.map(taskHtml).join('') : '<div class="empty">Nothing completed yet.</div>';
+  document.querySelectorAll('.task-check').forEach(el => {
+    el.onclick = () => { const t = data.tasks.find(x => x.id === el.dataset.id); if (t) { t.done = !t.done; saveData(); renderTasks(); } };
+  });
+  document.querySelectorAll('.task-del').forEach(el => {
+    el.onclick = () => { data.tasks = data.tasks.filter(x => x.id !== el.dataset.id); saveData(); renderTasks(); };
+  });
+}
+function taskHtml(t) {
+  const pClass = t.priority === 'high' ? 'p-high' : t.priority === 'low' ? 'p-low' : 'p-med';
+  const pLabel = t.priority === 'high' ? 'High' : t.priority === 'low' ? 'Low' : 'Medium';
+  return `<div class="item ${t.done ? 'done' : ''}">
+    <div class="checkbox task-check ${t.done ? 'checked' : ''}" data-id="${t.id}">${t.done ? '✓' : ''}</div>
+    <div class="item-body">
+      <div class="item-title">${escapeHtml(t.title)}</div>
+      <div class="item-meta"><span class="priority-tag ${pClass}">${pLabel}</span>${t.due ? `<span>${fmtDate(t.due)}</span>` : ''}</div>
+    </div>
+    <button class="del-btn task-del" data-id="${t.id}" aria-label="Delete task">&times;</button>
+  </div>`;
+}
+document.getElementById('add-task-btn').onclick = () => {
+  const titleEl = document.getElementById('task-title');
+  const title = titleEl.value.trim();
+  if (!title) { titleEl.style.borderColor = 'var(--danger)'; titleEl.placeholder = 'Enter a task first'; return; }
+  const priority = document.getElementById('task-priority').value;
+  const due = document.getElementById('task-due').value;
+  data.tasks.push({ id: uid(), title, priority, due, done: false, created: Date.now() });
+  titleEl.value = ''; titleEl.style.borderColor = '';
+  document.getElementById('task-due').value = '';
+  saveData(); renderTasks(); renderCalendar();
+};
+document.getElementById('task-title').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('add-task-btn').click(); });
+
+// ---------- GOALS ----------
+function renderGoals() {
+  const el = document.getElementById('goals-list');
+  if (!data.goals.length) { el.innerHTML = '<div class="empty">No long-term objectives yet. Add one above.</div>'; return; }
+  el.innerHTML = data.goals.map(g => {
+    const linked = data.tasks.filter(t => t.goalId === g.id);
+    const doneCount = linked.filter(t => t.done).length;
+    const pct = linked.length ? Math.round((doneCount / linked.length) * 100) : 0;
+    return `<div class="goal-card">
+      <div class="goal-title">${escapeHtml(g.title)}</div>
+      ${g.why ? `<div class="goal-why">${escapeHtml(g.why)}</div>` : ''}
+      <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="goal-footer"><span>${linked.length ? doneCount + ' of ' + linked.length + ' linked tasks done' : 'No linked tasks'}</span>
+      <button class="del-btn goal-del" data-id="${g.id}" aria-label="Delete goal">&times;</button></div>
+    </div>`;
+  }).join('');
+  document.querySelectorAll('.goal-del').forEach(elm => { elm.onclick = () => { data.goals = data.goals.filter(x => x.id !== elm.dataset.id); saveData(); renderGoals(); }; });
+}
+document.getElementById('add-goal-btn').onclick = () => {
+  const titleEl = document.getElementById('goal-title');
+  const title = titleEl.value.trim();
+  if (!title) { titleEl.style.borderColor = 'var(--danger)'; titleEl.placeholder = 'Enter an objective first'; return; }
+  const why = document.getElementById('goal-why').value.trim();
+  data.goals.push({ id: uid(), title, why, created: Date.now() });
+  titleEl.value = ''; titleEl.style.borderColor = '';
+  document.getElementById('goal-why').value = '';
+  saveData(); renderGoals();
+};
+
+// ---------- DOCS ----------
+function renderDocs() {
+  const el = document.getElementById('docs-list');
+  if (!data.docs.length) { el.innerHTML = '<div class="empty">No documents added yet.</div>'; return; }
+  const sorted = [...data.docs].sort((a,b) => b.created - a.created);
+  el.innerHTML = sorted.map(d => {
+    const initials = d.title.slice(0,2).toUpperCase();
+    return `<div class="item">
+      <div class="doc-icon">${escapeHtml(initials)}</div>
+      <div class="item-body">
+        <div class="item-title">${escapeHtml(d.title)}</div>
+        <div class="item-meta">${d.link ? `<a href="${escapeHtml(d.link)}" target="_blank" rel="noopener">Open link ↗</a>` : ''}${d.note ? `<span>${escapeHtml(d.note)}</span>` : ''}</div>
+      </div>
+      <button class="del-btn doc-del" data-id="${d.id}" aria-label="Delete document">&times;</button>
+    </div>`;
+  }).join('');
+  document.querySelectorAll('.doc-del').forEach(elm => { elm.onclick = () => { data.docs = data.docs.filter(x => x.id !== elm.dataset.id); saveData(); renderDocs(); }; });
+}
+document.getElementById('add-doc-btn').onclick = () => {
+  const titleEl = document.getElementById('doc-title');
+  const title = titleEl.value.trim();
+  if (!title) { titleEl.style.borderColor = 'var(--danger)'; titleEl.placeholder = 'Enter a name first'; return; }
+  const link = document.getElementById('doc-link').value.trim();
+  const note = document.getElementById('doc-note').value.trim();
+  data.docs.push({ id: uid(), title, link, note, created: Date.now() });
+  titleEl.value = ''; titleEl.style.borderColor = '';
+  document.getElementById('doc-link').value = '';
+  document.getElementById('doc-note').value = '';
+  saveData(); renderDocs();
+};
+
+// ---------- CALENDAR ----------
+function dateKey(d) { return d.toISOString().slice(0,10); }
+
+function itemsOnDate(dstr) {
+  const tasks = data.tasks.filter(t => t.due === dstr);
+  const events = data.events.filter(e => e.date === dstr);
+  return { tasks, events };
+}
+
+function renderCalendar() {
+  const y = calViewDate.getFullYear(), m = calViewDate.getMonth();
+  document.getElementById('cal-month-label').textContent = calViewDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+  const first = new Date(y, m, 1);
+  const startOffset = first.getDay();
+  const daysInMonth = new Date(y, m+1, 0).getDate();
+  const grid = document.getElementById('cal-grid');
+  const dows = ['S','M','T','W','T','F','S'];
+  let html = dows.map(d => `<div class="cal-dow">${d}</div>`).join('');
+  for (let i = 0; i < startOffset; i++) html += `<div class="cal-day empty-day"></div>`;
+  const todayKey = dateKey(new Date());
+  const selKey = dateKey(selectedDay);
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dt = new Date(y, m, day);
+    const key = dateKey(dt);
+    const { tasks, events } = itemsOnDate(key);
+    const hasItems = tasks.length + events.length > 0;
+    const cls = ['cal-day'];
+    if (key === todayKey) cls.push('today');
+    if (key === selKey) cls.push('selected');
+    html += `<div class="${cls.join(' ')}" data-date="${key}"><span>${day}</span>${hasItems ? '<div class="cal-dot"></div>' : ''}</div>`;
+  }
+  grid.innerHTML = html;
+  document.querySelectorAll('.cal-day[data-date]').forEach(el => {
+    el.onclick = () => { selectedDay = new Date(el.dataset.date + 'T00:00:00'); renderCalendar(); renderCalDay(); };
+  });
+  renderCalDay();
+}
+
+function renderCalDay() {
+  const key = dateKey(selectedDay);
+  const isToday = key === dateKey(new Date());
+  document.getElementById('cal-day-label').textContent = isToday ? 'Today' : selectedDay.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+  const { tasks, events } = itemsOnDate(key);
+  const el = document.getElementById('cal-day-items');
+  if (!tasks.length && !events.length) { el.innerHTML = '<div class="empty">Nothing scheduled this day.</div>'; return; }
+  let html = '';
+  events.sort((a,b) => (a.time||'').localeCompare(b.time||'')).forEach(e => {
+    html += `<div class="item"><div class="checkbox" style="visibility:hidden;"></div><div class="item-body"><div class="item-title">${escapeHtml(e.title)}</div><div class="item-meta">${e.time ? `<span>${e.time}</span>` : '<span>All day</span>'}</div></div><button class="del-btn event-del" data-id="${e.id}" aria-label="Delete event">&times;</button></div>`;
+  });
+  tasks.forEach(t => { html += taskHtml(t); });
+  el.innerHTML = html;
+  document.querySelectorAll('.event-del').forEach(elm => { elm.onclick = () => { data.events = data.events.filter(x => x.id !== elm.dataset.id); saveData(); renderCalendar(); }; });
+  document.querySelectorAll('.task-check').forEach(elx => { elx.onclick = () => { const t = data.tasks.find(x => x.id === elx.dataset.id); if (t) { t.done = !t.done; saveData(); renderTasks(); renderCalDay(); } }; });
+  document.querySelectorAll('.task-del').forEach(elx => { elx.onclick = () => { data.tasks = data.tasks.filter(x => x.id !== elx.dataset.id); saveData(); renderTasks(); renderCalendar(); }; });
+}
+
+document.getElementById('cal-prev').onclick = () => { calViewDate.setMonth(calViewDate.getMonth() - 1); renderCalendar(); };
+document.getElementById('cal-next').onclick = () => { calViewDate.setMonth(calViewDate.getMonth() + 1); renderCalendar(); };
+
+document.getElementById('add-event-btn').onclick = () => {
+  const titleEl = document.getElementById('event-title');
+  const title = titleEl.value.trim();
+  const dateEl = document.getElementById('event-date');
+  if (!title) { titleEl.style.borderColor = 'var(--danger)'; titleEl.placeholder = 'Enter an event title first'; return; }
+  if (!dateEl.value) { dateEl.style.borderColor = 'var(--danger)'; return; }
+  const time = document.getElementById('event-time').value;
+  data.events.push({ id: uid(), title, date: dateEl.value, time, created: Date.now() });
+  titleEl.value = ''; titleEl.style.borderColor = '';
+  dateEl.style.borderColor = '';
+  const evDate = new Date(dateEl.value + 'T00:00:00');
+  dateEl.value = ''; document.getElementById('event-time').value = '';
+  calViewDate = new Date(evDate.getFullYear(), evDate.getMonth(), 1);
+  selectedDay = evDate;
+  saveData(); renderCalendar();
+};
+
+// ---------- OUTLOOK CALENDAR SYNC ----------
+const CLIENT_ID_KEY = 'my-hub-msal-client-id';
+let msalInstance = null;
+let msalAccount = null;
+
+function getClientId() { return localStorage.getItem(CLIENT_ID_KEY) || ''; }
+
+function initMsal() {
+  const clientId = getClientId();
+  const statusEl = document.getElementById('outlook-status');
+  if (!clientId) {
+    statusEl.textContent = 'Add your Client ID in the Sync tab first.';
+    return null;
+  }
+  if (!msalInstance || msalInstance.__clientId !== clientId) {
+    msalInstance = new msal.PublicClientApplication({
+      auth: {
+        clientId,
+        authority: 'https://login.microsoftonline.com/common',
+        redirectUri: window.location.origin + window.location.pathname
+      }
+    });
+    msalInstance.__clientId = clientId;
+  }
+  return msalInstance;
+}
+
+async function connectOutlook() {
+  const statusEl = document.getElementById('outlook-status');
+  const app = initMsal();
+  if (!app) return;
+  statusEl.textContent = 'Opening Microsoft sign-in…';
+  try {
+    const result = await app.loginPopup({ scopes: ['Calendars.Read'] });
+    msalAccount = result.account;
+    statusEl.textContent = `Connected as ${msalAccount.username}.`;
+    document.getElementById('outlook-connect-btn').textContent = 'Reconnect Outlook';
+    document.getElementById('outlook-sync-btn').style.display = '';
+    await syncOutlookEvents();
+  } catch (err) {
+    statusEl.textContent = 'Sign-in failed or was cancelled. Check your Client ID and try again.';
+    console.error(err);
+  }
+}
+
+async function getGraphToken() {
+  const app = initMsal();
+  if (!app || !msalAccount) return null;
+  try {
+    const result = await app.acquireTokenSilent({ scopes: ['Calendars.Read'], account: msalAccount });
+    return result.accessToken;
+  } catch (err) {
+    const result = await app.acquireTokenPopup({ scopes: ['Calendars.Read'], account: msalAccount });
+    return result.accessToken;
+  }
+}
+
+async function syncOutlookEvents() {
+  const statusEl = document.getElementById('outlook-status');
+  statusEl.textContent = 'Syncing…';
+  try {
+    const token = await getGraphToken();
+    if (!token) { statusEl.textContent = 'Not connected yet.'; return; }
+    const start = new Date(); start.setDate(start.getDate() - 7);
+    const end = new Date(); end.setDate(end.getDate() + 60);
+    const url = `https://graph.microsoft.com/v1.0/me/calendarview?startDateTime=${start.toISOString()}&endDateTime=${end.toISOString()}&$select=subject,start,end,isAllDay&$top=100`;
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}`, Prefer: 'outlook.timezone="UTC"' } });
+    if (!res.ok) throw new Error('Graph request failed: ' + res.status);
+    const json = await res.json();
+    const existingIds = new Set(data.events.map(e => e.graphId).filter(Boolean));
+    let added = 0;
+    (json.value || []).forEach(ev => {
+      const graphId = ev.id;
+      if (existingIds.has(graphId)) return;
+      const dt = ev.start.dateTime ? ev.start.dateTime : ev.start.date;
+      const date = dt.slice(0, 10);
+      const time = ev.isAllDay ? '' : dt.slice(11, 16);
+      data.events.push({ id: uid(), title: ev.subject || 'Untitled event', date, time, graphId, created: Date.now() });
+      existingIds.add(graphId);
+      added++;
+    });
+    saveData(); renderCalendar();
+    statusEl.textContent = `Synced — ${added} new event${added === 1 ? '' : 's'} added.`;
+  } catch (err) {
+    statusEl.textContent = 'Sync failed. Try Reconnect Outlook.';
+    console.error(err);
+  }
+}
+
+document.getElementById('outlook-connect-btn').onclick = connectOutlook;
+document.getElementById('outlook-sync-btn').onclick = syncOutlookEvents;
+document.getElementById('save-client-id-btn').onclick = () => {
+  const val = document.getElementById('client-id-input').value.trim();
+  if (!val) return;
+  localStorage.setItem(CLIENT_ID_KEY, val);
+  document.getElementById('last-export-note').textContent = 'Client ID saved. Go to the Calendar tab and connect Outlook.';
+};
+(function prefillClientId() {
+  const existing = getClientId();
+  if (existing) document.getElementById('client-id-input').value = existing;
+})();
+
+// ---------- CALENDAR FILE IMPORT (.ics) ----------
+function unfoldIcs(text) {
+  // ICS spec: continuation lines start with a space or tab and get joined to the previous line
+  return text.replace(/\r\n/g, '\n').split('\n').reduce((lines, line) => {
+    if ((line.startsWith(' ') || line.startsWith('\t')) && lines.length) {
+      lines[lines.length - 1] += line.slice(1);
+    } else {
+      lines.push(line);
+    }
+    return lines;
+  }, []);
+}
+
+function parseIcsDate(raw) {
+  // Handles YYYYMMDD (all-day) and YYYYMMDDTHHMMSS[Z] (timed)
+  if (!raw) return null;
+  const value = raw.split(':').pop().trim();
+  const m = value.match(/^(\d{4})(\d{2})(\d{2})(T(\d{2})(\d{2})(\d{2}))?/);
+  if (!m) return null;
+  const date = `${m[1]}-${m[2]}-${m[3]}`;
+  const time = m[4] ? `${m[5]}:${m[6]}` : '';
+  return { date, time };
+}
+
+function parseIcs(text) {
+  const lines = unfoldIcs(text);
+  const events = [];
+  let cur = null;
+  for (const line of lines) {
+    if (line.startsWith('BEGIN:VEVENT')) { cur = {}; }
+    else if (line.startsWith('END:VEVENT')) { if (cur) events.push(cur); cur = null; }
+    else if (cur) {
+      const idx = line.indexOf(':');
+      if (idx === -1) continue;
+      const key = line.slice(0, idx).split(';')[0];
+      const val = line.slice(idx + 1);
+      if (key === 'SUMMARY') cur.title = val.replace(/\\,/g, ',').replace(/\\;/g, ';').trim();
+      if (key === 'DTSTART') { const d = parseIcsDate(line); if (d) { cur.date = d.date; cur.time = d.time; } }
+      if (key === 'UID') cur.uid = val.trim();
+    }
+  }
+  return events.filter(e => e.title && e.date);
+}
+
+document.getElementById('import-ics-btn').onclick = () => document.getElementById('import-ics-file').click();
+document.getElementById('import-ics-file').onchange = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const noteEl = document.getElementById('ics-import-note');
+    try {
+      const parsed = parseIcs(reader.result);
+      if (!parsed.length) { noteEl.textContent = 'No events found in that file.'; return; }
+      const existingUids = new Set(data.events.map(ev => ev.icsUid).filter(Boolean));
+      let added = 0, skipped = 0;
+      parsed.forEach(ev => {
+        if (ev.uid && existingUids.has(ev.uid)) { skipped++; return; }
+        data.events.push({ id: uid(), title: ev.title, date: ev.date, time: ev.time || '', icsUid: ev.uid || null, created: Date.now() });
+        if (ev.uid) existingUids.add(ev.uid);
+        added++;
+      });
+      saveData(); renderCalendar();
+      noteEl.textContent = `Imported ${added} event${added === 1 ? '' : 's'}${skipped ? `, skipped ${skipped} already-imported` : ''}.`;
+    } catch (err) {
+      noteEl.textContent = 'Could not read that file — make sure it\'s a .ics calendar export.';
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+};
+
+// ---------- EXPORT / IMPORT ----------
+document.getElementById('export-btn').onclick = () => {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'my-hub-backup.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  document.getElementById('last-export-note').textContent = 'Exported just now. Save this file into your OneDrive folder, then use Import on your other device.';
+};
+document.getElementById('import-btn').onclick = () => document.getElementById('import-file').click();
+document.getElementById('import-file').onchange = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const imported = JSON.parse(reader.result);
+      data = {
+        tasks: imported.tasks || [],
+        goals: imported.goals || [],
+        docs: imported.docs || [],
+        events: imported.events || []
+      };
+      saveData(); renderAll();
+      document.getElementById('last-export-note').textContent = 'Import complete.';
+    } catch (err) {
+      document.getElementById('last-export-note').textContent = 'That file could not be read. Make sure it is a hub export.';
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+};
+
+function renderAll() { renderTasks(); renderGoals(); renderDocs(); renderCalendar(); }
+
+// TABS
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+  };
+});
+
+loadData();
+</script>
+</body>
+</html>
