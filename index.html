@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nandini — your assistant</title>
+<!-- OneSignal web push (needs OneSignalSDKWorker.js at your site root) -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <style>
   :root{
     --pink-bg1:#FCE8F0; --pink-bg2:#F7D3E2;
@@ -17,7 +19,7 @@
   }
   *{box-sizing:border-box;}
   html,body{height:100%;}
-  body{ margin:0; font-family:var(--font); color:var(--ink);
+  body{ margin:0; font-family:var(--font); color:var(--ink); overflow-x:hidden;
     background:linear-gradient(160deg,var(--pink-bg1) 0%,var(--pink-bg2) 100%);
     -webkit-font-smoothing:antialiased; min-height:100%; }
   .bg-court{ position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.5; }
@@ -61,6 +63,9 @@
     background:radial-gradient(circle at 34% 32%, #DCEE55, var(--ball) 70%, var(--ball-deep));
     box-shadow:0 4px 12px rgba(150,170,40,.4); display:flex; align-items:center; justify-content:center; transition:transform .12s; }
   .send:hover{ transform:scale(1.06); } .send:active{ transform:scale(.94); }
+  .bell{ display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 13px; border-radius:999px; border:1px solid var(--line); background:var(--surface-tint); cursor:pointer; color:var(--rose-deep); font-family:var(--font); font-size:12.5px; font-weight:500; transition:.15s; }
+  .bell:hover{ border-color:var(--rose); }
+  .bell.on{ background:var(--rose); color:#fff; border-color:var(--rose); }
 
   /* scrollable content area for calendar/todos */
   .scroll{ flex:1; overflow-y:auto; padding:20px 22px 26px; }
@@ -88,8 +93,8 @@
   .daybox h3{ font-size:15px; font-weight:600; margin:0 0 10px; }
   .erow{ display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--line-soft); font-size:14px; }
   .erow .etime{ color:var(--ink-soft); font-size:12.5px; font-variant-numeric:tabular-nums; }
-  .erow .etitle{ flex:1; } .erow .x{ background:none; border:none; color:var(--ink-soft); cursor:pointer; }
-  .erow .x:hover{ color:var(--rose-deep); }
+  .erow .etitle{ flex:1; } .erow .x{ background:none; border:none; color:var(--ink-soft); cursor:pointer; font-size:16px; line-height:1; padding:6px 9px; border-radius:8px; }
+  .erow .x:hover{ color:var(--rose-deep); background:var(--surface-tint); }
   .qadd{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
   .qadd input[type=text]{ flex:1; min-width:170px; }
   input[type=text],input[type=date],select{ font-family:var(--font); font-size:13.5px; padding:10px 12px; border:1px solid var(--line); border-radius:12px; background:var(--surface-tint); color:var(--ink); outline:none; }
@@ -117,7 +122,7 @@
   .trow .tt{ flex:1; } .trow.done .tt{ text-decoration:line-through; color:var(--ink-soft); }
   .trow .badge{ display:inline-flex; align-items:center; gap:5px; font-size:11.5px; color:var(--rose-deep); background:var(--surface-tint); border:1px solid var(--line); border-radius:8px; padding:3px 8px; }
   .trow .badge.over{ color:#B54848; border-color:#F0CFCF; }
-  .trow .x{ background:none; border:none; color:var(--ink-soft); cursor:pointer; } .trow .x:hover{ color:var(--rose-deep); }
+  .trow .x{ background:none; border:none; color:var(--ink-soft); cursor:pointer; font-size:16px; line-height:1; padding:6px 9px; border-radius:8px; } .trow .x:hover{ color:var(--rose-deep); background:var(--surface-tint); }
   .taskadd{ display:flex; gap:8px; margin-top:16px; flex-wrap:wrap; }
   .taskadd input[type=text]{ flex:1; min-width:160px; }
   .empty{ text-align:center; color:var(--ink-soft); font-size:14px; padding:34px 20px; }
@@ -126,7 +131,23 @@
   .sync{ display:flex; flex-wrap:wrap; gap:8px; margin-top:22px; padding-top:18px; border-top:1px solid var(--line-soft); align-items:center; }
   .sync .lbl{ width:100%; font-size:13px; font-weight:600; color:var(--ink-soft); margin-bottom:2px; }
 
-  @media (max-width:520px){ .card{ height:92vh; } .bubble{ max-width:86%; } .cell{ min-height:60px; } }
+  @media (max-width:560px){
+    .shell{ padding:0; }
+    .card{ height:100vh; height:100dvh; max-width:100%; border-radius:0; box-shadow:none; }
+    header.hd{ padding:16px 15px 12px; }
+    header.hd h1{ font-size:20px; }
+    header.hd p{ font-size:12.5px; }
+    .seg button{ padding:6px 11px; font-size:12.5px; }
+    .bubble{ max-width:88%; }
+    .log{ padding:16px 14px 6px; }
+    .scroll{ padding:16px 14px 22px; }
+    .cell{ min-height:56px; border-radius:9px; padding:4px; }
+    .evbar{ font-size:9px; }
+    .qadd input[type=text], .taskadd input[type=text], #catName, #qCat, #taskDue{ flex:1 1 100%; min-width:0; width:100%; }
+    .qadd, .taskadd, .catadd, .sync{ gap:8px; }
+    .sync .btn{ flex:1 1 auto; text-align:center; }
+    .inputbar{ padding:12px 12px 16px; }
+  }
   @media (prefers-reduced-motion:reduce){ *{ transition:none!important; } }
   .send:focus-visible,.seg button:focus-visible,.suggests button:focus-visible,.btn:focus-visible{ outline:2px solid var(--rose-deep); outline-offset:2px; }
 </style>
@@ -164,10 +185,16 @@
           <h1 id="greeting">Hi, Nandini</h1>
           <p>Tell me a reminder, a to-do, or a calendar event.</p>
         </div>
-        <div class="seg">
-          <button data-view="chat" class="active">Chat</button>
-          <button data-view="calendar">Calendar</button>
-          <button data-view="todos">To-dos</button>
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;">
+          <button class="bell" id="notifBtn" aria-label="Enable reminders">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+            <span id="bellLabel">Enable reminders</span>
+          </button>
+          <div class="seg">
+            <button data-view="chat" class="active">Chat</button>
+            <button data-view="calendar">Calendar</button>
+            <button data-view="todos">To-dos</button>
+          </div>
         </div>
       </div>
     </header>
@@ -176,6 +203,7 @@
     <section id="chat" class="view active">
       <div class="log" id="log"></div>
       <div class="suggests">
+        <button data-fill="What's on today?">What's on today?</button>
         <button data-fill="Remind me to ">Remind me to…</button>
         <button data-fill="Add a calendar event ">Calendar event…</button>
         <button data-fill="Add a to-do: ">To-do…</button>
@@ -251,6 +279,14 @@
 (function(){
   const KEY='nandini-hub';
   const NAME='Nandini';
+  /* ===== Fill these in after the setup steps ===== */
+  const CONFIG={
+    ONESIGNAL_APP_ID:"b17dd355-1344-4d1c-ae79-a17220a634f8",   // public — safe to put here
+    ONESIGNAL_SW_SCOPE:"/myhub1/",                              // your app's subfolder
+    ONESIGNAL_SW_PATH:"/myhub1/OneSignalSDKWorker.js",          // where the worker file lives
+    REMINDER_BACKEND_URL:"https://hub-reminders.nandini-gupta-1998.workers.dev",   // your Cloudflare Worker URL
+    SYNC_TOKEN:"syncKey_Np7q2Ex9Rf4Ka"                          // must match the SYNC_TOKEN secret in your Worker
+  };
   const TYPE={ event:{label:'Calendar event',color:'#E0688A'}, reminder:{label:'Reminder',color:'#C79A2E'}, todo:{label:'To-do',color:'#8AA0C4'} };
 
   let data={
@@ -266,15 +302,60 @@
   let calY,calM,selDate=today(),activeTab='general';
 
   async function load(){
-    try{ const r=await window.storage.get(KEY,false); if(r&&r.value) data=Object.assign(data,JSON.parse(r.value)); }catch(e){}
+    try{ const raw=localStorage.getItem(KEY); if(raw) data=Object.assign(data,JSON.parse(raw)); }catch(e){}
     if(!data.tabs.find(t=>t.id===activeTab)) activeTab=(data.tabs[0]||{}).id;
     const n=new Date(); calY=n.getFullYear(); calM=n.getMonth();
     greet();
     if(!data.log.length){ pushBot(`Hi ${NAME}! Type things the way you'd say them — like <em>“remind me at 4pm to do laundry”</em> or <em>“calendar event 7–9pm today, dinner with Sam.”</em> I'll file each one where it belongs.`); }
     else data.log.forEach(m=>renderMsg(m.role,m.html));
     scrollLog(); renderCal(); renderTodos();
+    refreshBell(); scheduleReminders();
+    cloudPull();
+    if(syncOn()){ setInterval(cloudPull, 12000); window.addEventListener('focus',cloudPull); document.addEventListener('visibilitychange',()=>{ if(!document.hidden) cloudPull(); }); }
   }
-  async function save(){ try{ await window.storage.set(KEY,JSON.stringify(data),false); }catch(e){} }
+  function save(){ data.updatedAt=Date.now(); try{ localStorage.setItem(KEY,JSON.stringify(data)); }catch(e){} scheduleReminders(); cloudPush(); }
+
+  /* ---------- notifications ---------- */
+  window.OneSignalDeferred=window.OneSignalDeferred||[];
+  if(CONFIG.ONESIGNAL_APP_ID && !CONFIG.ONESIGNAL_APP_ID.startsWith('PASTE')){
+    OneSignalDeferred.push(async function(OneSignal){ try{ await OneSignal.init({appId:CONFIG.ONESIGNAL_APP_ID, serviceWorkerPath:CONFIG.ONESIGNAL_SW_PATH, serviceWorkerParam:{scope:CONFIG.ONESIGNAL_SW_SCOPE}, allowLocalhostAsSecureOrigin:true}); }catch(e){} });
+  }
+  const notifBtn=document.getElementById('notifBtn');
+  function notifSupported(){ return ('Notification' in window); }
+  function isStandalone(){ return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true; }
+  function refreshBell(){ const on=notifSupported() && Notification.permission==='granted'; notifBtn.classList.toggle('on',on); const lbl=document.getElementById('bellLabel'); if(lbl) lbl.textContent = on?'Reminders on':'Enable reminders'; }
+  notifBtn.addEventListener('click',async ()=>{
+    if(!notifSupported()){
+      const iOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+      alert(iOS && !isStandalone()
+        ? 'To turn on reminders on iPhone: tap the Share button → Add to Home Screen, then open this app from that new icon and tap the bell again.'
+        : 'This browser doesn’t support notifications here. Use Chrome or Edge on desktop, or Safari on iOS 16.4+ opened from the Home Screen.');
+      return;
+    }
+    if(CONFIG.ONESIGNAL_APP_ID && !CONFIG.ONESIGNAL_APP_ID.startsWith('PASTE')){
+      OneSignalDeferred.push(async function(OneSignal){ try{ await OneSignal.Notifications.requestPermission(); }catch(e){} });
+    }
+    try{ await Notification.requestPermission(); }catch(e){}
+    refreshBell(); scheduleReminders();
+  });
+  const timers={};
+  function scheduleReminders(){
+    Object.values(timers).forEach(clearTimeout);
+    if(!('Notification'in window) || Notification.permission!=='granted') return;
+    const td=today(), now=Date.now(), items=[];
+    data.events.filter(e=>e.date===td && e.start).forEach(e=>items.push({k:'e'+e.id,label:e.title,time:e.start}));
+    data.tasks.filter(t=>t.reminder && t.time && !t.done && (t.due===td||!t.due)).forEach(t=>items.push({k:'t'+t.id,label:t.text,time:t.time}));
+    items.forEach(it=>{ const p=it.time.split(':').map(Number); const when=new Date(); when.setHours(p[0],p[1],0,0); const delay=when.getTime()-now;
+      if(delay>0 && delay<24*3600*1000){ timers[it.k]=setTimeout(()=>{ try{ new Notification('Reminder',{body:it.label+' at '+fmt(it.time)}); }catch(e){} }, delay); } });
+  }
+  function notifyBackend(title,date,time){ if(!CONFIG.REMINDER_BACKEND_URL||!time) return; const when=new Date(date+'T'+time+':00').toISOString(); fetch(CONFIG.REMINDER_BACKEND_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title,when})}).catch(()=>{}); }
+
+  /* ---------- live sync (Cloudflare KV) ---------- */
+  function syncOn(){ return CONFIG.REMINDER_BACKEND_URL && CONFIG.SYNC_TOKEN && !CONFIG.SYNC_TOKEN.startsWith('PASTE'); }
+  let pushTimer=null;
+  function cloudPush(){ if(!syncOn())return; clearTimeout(pushTimer); pushTimer=setTimeout(()=>{ fetch(CONFIG.REMINDER_BACKEND_URL+'/data',{method:'PUT',headers:{'Content-Type':'application/json','x-sync-token':CONFIG.SYNC_TOKEN},body:JSON.stringify(data)}).catch(()=>{}); },800); }
+  async function cloudPull(){ if(!syncOn())return; try{ const res=await fetch(CONFIG.REMINDER_BACKEND_URL+'/data',{headers:{'x-sync-token':CONFIG.SYNC_TOKEN}}); if(!res.ok)return; const remote=await res.json(); if(remote&&remote.updatedAt&&(!data.updatedAt||remote.updatedAt>data.updatedAt)){ data=Object.assign(data,remote); if(!data.tabs.find(t=>t.id===activeTab)) activeTab=(data.tabs[0]||{}).id; try{ localStorage.setItem(KEY,JSON.stringify(data)); }catch(e){} renderCal(); renderTodos(); rerenderChat(); } }catch(e){} }
+  function rerenderChat(){ const log=document.getElementById('log'); if(!log)return; log.innerHTML=''; (data.log||[]).forEach(m=>renderMsg(m.role,m.html)); scrollLog(); }
 
   function greet(){ const h=new Date().getHours(); const g=h<12?'Good morning':h<18?'Good afternoon':'Good evening'; document.getElementById('greeting').textContent=`${g}, ${NAME}`; }
 
@@ -297,10 +378,30 @@
   document.getElementById('send').addEventListener('click',handleSend);
   document.querySelectorAll('.suggests button').forEach(b=>b.addEventListener('click',()=>{ input.value=b.dataset.fill; input.focus(); input.dispatchEvent(new Event('input')); }));
 
+  function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+  function isQuery(text){ const l=text.toLowerCase().trim(); return /\?\s*$/.test(l) || /^(what|what'?s|whats|show|list|when|do i have|anything|any )/.test(l) || /\bwhat'?s on\b/.test(l); }
+  function answerQuery(text){
+    const l=text.toLowerCase();
+    let date=today(), label='today';
+    if(/\btomorrow\b/.test(l)){ date=addDays(1); label='tomorrow'; }
+    else { for(let i=0;i<7;i++){ if(new RegExp('\\b'+WEEK[i]+'\\b').test(l)){ date=nextWeekday(i,false); label=niceDate(date); break; } } }
+    if(/\b(task|to-?do|to do|pending|open)\b/.test(l) && !/\b(event|calendar|schedule)\b/.test(l)){
+      const open=data.tasks.filter(t=>!t.done);
+      return open.length ? '<strong>Open to-dos:</strong><br>'+open.map(t=>'• '+esc(t.text)+(t.time?' ('+fmt(t.time)+')':'')+(t.due?' — '+shortDate(t.due):'')).join('<br>') : 'No open to-dos right now.';
+    }
+    const evs=data.events.filter(e=>e.date===date).sort((a,b)=>(a.start||'').localeCompare(b.start||''));
+    const rem=data.tasks.filter(t=>t.reminder&&t.due===date&&!t.done).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+    let out='';
+    if(evs.length) out+='<strong>'+cap(label)+'’s schedule:</strong><br>'+evs.map(e=>'• '+(e.start?fmtRange(e.start,e.end)+' — ':'')+esc(e.title)+(e.loc?' ('+esc(e.loc)+')':'')).join('<br>');
+    if(rem.length) out+=(out?'<br><br>':'')+'<strong>Reminders:</strong><br>'+rem.map(r=>'• '+(r.time?fmt(r.time)+' — ':'')+esc(r.text)).join('<br>');
+    return out || ('Nothing scheduled for '+label+'. 🎾');
+  }
   function handleSend(){
     const text=input.value.trim(); if(!text) return;
     pushMe(text); input.value=''; input.style.height='auto';
+    if(isQuery(text)){ pushBot(answerQuery(text)); return; }
     const r=parse(text); fileItem(r);
+    if(r.type==='event'){ const p=r.date.split('-'); calY=+p[0]; calM=+p[1]-1; selDate=r.date; }
     const t=TYPE[r.type];
     const chip=`<span class="chip"><span class="tdot" style="background:${t.color}"></span>${t.label}</span>`;
     let c;
@@ -314,8 +415,10 @@
     const id=uid();
     if(r.type==='event'){
       const cat=guessCat(r.raw); data.events.push({id,title:r.title,date:r.date,start:r.start,end:r.end,category:cat});
+      if(r.start) notifyBackend(r.title,r.date,r.start);
     } else if(r.type==='reminder'){
       const tab=guessTab(r.raw); data.tasks.push({id,tabId:tab,text:r.title,done:false,due:r.date,time:r.time||null,reminder:true});
+      if(r.time) notifyBackend(r.title,r.date,r.time);
     } else {
       const tab=guessTab(r.raw); data.tasks.push({id,tabId:tab,text:r.title,done:false,due:(r.date!==today()?r.date:null),time:null,reminder:false});
     }
@@ -326,13 +429,28 @@
   /* ---------- parser ---------- */
   const WEEK=['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
   const EVENT_WORDS=/\b(event|calendar|meeting|dinner|lunch|breakfast|brunch|appointment|party|class|practice|match|game|session|coffee|drinks|catch ?up|call with|standup|interview)\b/i;
+  const MONTHS={jan:0,january:0,feb:1,february:1,mar:2,march:2,apr:3,april:3,may:4,jun:5,june:5,jul:6,july:6,aug:7,august:7,sep:8,sept:8,september:8,oct:9,october:9,nov:10,november:10,dec:11,december:11};
+  const MONRE='jan|january|feb|february|mar|march|apr|april|may|jun|june|jul|july|aug|august|sep|sept|september|oct|october|nov|november|dec|december';
+  function fromMonthDay(mo,d){ const t=new Date(); t.setHours(0,0,0,0); let dt=new Date(t.getFullYear(),mo,d); dt.setHours(0,0,0,0); if(dt<t) dt=new Date(t.getFullYear()+1,mo,d); return iso(dt); }
+  function fromDayOfMonth(d){ const t=new Date(); t.setHours(0,0,0,0); let dt=new Date(t.getFullYear(),t.getMonth(),d); dt.setHours(0,0,0,0); if(dt<t) dt=new Date(t.getFullYear(),t.getMonth()+1,d); return iso(dt); }
+  function resolveDateFromText(lower){
+    let m;
+    if((m=lower.match(/\btomorrow\b/))) return {date:addDays(1),span:[m.index,m.index+m[0].length]};
+    if((m=lower.match(/\btonight\b/))) return {date:today(),span:[m.index,m.index+m[0].length]};
+    if((m=lower.match(/\btoday\b/))) return {date:today(),span:[m.index,m.index+m[0].length]};
+    if((m=lower.match(/\bin\s+(\d{1,2})\s+days?\b/))) return {date:addDays(parseInt(m[1],10)),span:[m.index,m.index+m[0].length]};
+    if((m=lower.match(new RegExp('\\b('+MONRE+')\\.?\\s+(\\d{1,2})(?:st|nd|rd|th)?\\b')))) return {date:fromMonthDay(MONTHS[m[1]],parseInt(m[2],10)),span:[m.index,m.index+m[0].length]};
+    if((m=lower.match(new RegExp('\\b(\\d{1,2})(?:st|nd|rd|th)?\\s+(?:of\\s+)?('+MONRE+')\\b')))) return {date:fromMonthDay(MONTHS[m[2]],parseInt(m[1],10)),span:[m.index,m.index+m[0].length]};
+    if((m=lower.match(/\b(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\b/))){ const mo=parseInt(m[1],10)-1,d=parseInt(m[2],10),y=m[3]?(m[3].length===2?2000+parseInt(m[3],10):parseInt(m[3],10)):null; if(mo>=0&&mo<12&&d>=1&&d<=31) return {date:y?iso(new Date(y,mo,d)):fromMonthDay(mo,d),span:[m.index,m.index+m[0].length]}; }
+    for(let i=0;i<7;i++){ const w=lower.match(new RegExp('\\b(next\\s+)?'+WEEK[i]+'\\b')); if(w) return {date:nextWeekday(i,!!w[1]),span:[w.index,w.index+w[0].length]}; }
+    if((m=lower.match(/\bthe\s+(\d{1,2})(?:st|nd|rd|th)\b/))||(m=lower.match(/\b(\d{1,2})(?:st|nd|rd|th)\b/))){ const d=parseInt(m[1],10); if(d>=1&&d<=31) return {date:fromDayOfMonth(d),span:[m.index,m.index+m[0].length]}; }
+    return null;
+  }
   function parse(text){
     const raw=text; let spans=[]; const lower=text.toLowerCase();
-    let date=today(),dm;
-    if((dm=lower.match(/\btomorrow\b/))){ date=addDays(1); spans.push([dm.index,dm.index+dm[0].length]); }
-    else if((dm=lower.match(/\btonight\b/))){ date=today(); spans.push([dm.index,dm.index+dm[0].length]); }
-    else if((dm=lower.match(/\btoday\b/))){ date=today(); spans.push([dm.index,dm.index+dm[0].length]); }
-    else { for(let i=0;i<7;i++){ const m=lower.match(new RegExp('\\b(next\\s+)?'+WEEK[i]+'\\b')); if(m){ date=nextWeekday(i,!!m[1]); spans.push([m.index,m.index+m[0].length]); break; } } }
+    let date=today();
+    const dres=resolveDateFromText(lower);
+    if(dres){ date=dres.date; spans.push(dres.span); }
 
     let start=null,end=null,time=null;
     const range=lower.match(/(?:from\s+)?(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\s*(?:-|–|to|until|till)\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/);
@@ -349,6 +467,7 @@
 
     let title=cut(text,spans)
       .replace(/^\s*(set|add|create|schedule|make|put|new)\s+(a|an|the)?\s*(calendar\s+event|event|reminder|to-?do|task|meeting|appointment)?\s*/i,'')
+      .replace(/^\s*(to|on|in)\s+(my\s+)?calendar\s*/i,'').replace(/^\s*calendar\s*/i,'')
       .replace(/^\s*remind me to\s*/i,'').replace(/^\s*remind me\s*/i,'').replace(/^\s*remember to\s*/i,'')
       .replace(/[:,\-–]/g,' ').replace(/\s+/g,' ').trim();
     let g=0; while(g++<8){ const m=title.match(/^(to|for|from|at|on|of|the|a|an|about|with)\b\s*/i); if(!m)break; title=title.slice(m[0].length); }
@@ -411,6 +530,7 @@
   document.getElementById('qInput').addEventListener('keydown',e=>{ if(e.key==='Enter') qAdd(); });
   function qAdd(){ const raw=document.getElementById('qInput').value.trim(); if(!raw)return; const r=parse(raw);
     data.events.push({id:uid(),title:r.title,date:selDate,start:r.start,end:r.end,category:document.getElementById('qCat').value});
+    if(r.start) notifyBackend(r.title,selDate,r.start);
     document.getElementById('qInput').value=''; save(); renderCal(); }
 
   /* ---------- todos ---------- */
