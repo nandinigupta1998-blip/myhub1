@@ -629,6 +629,18 @@
   function to24(h,m,ap){ ap=ap?ap.toLowerCase():null; if(ap==='pm'&&h<12)h+=12; if(ap==='am'&&h===12)h=0; if(!ap&&h<8)h+=12; return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0'); }
   function addHour(t){ let[h,m]=t.split(':').map(Number); h=(h+1)%24; return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0'); }
 
+  /* ---------- main tab switching ---------- */
+  document.querySelectorAll('nav.tabs button').forEach(b=>b.addEventListener('click',()=>{
+    document.querySelectorAll('nav.tabs button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    const target=document.getElementById(b.dataset.view);
+    if(target) target.classList.add('active');
+    if(b.dataset.view==='calendar') renderCal();
+    else if(b.dataset.view==='todos') renderTodos();
+    else if(b.dataset.view==='chat') scrollLog();
+  }));
+
   /* ---------- calendar ---------- */
   document.querySelectorAll('.viewseg button').forEach(b=>b.addEventListener('click',()=>{ mode=b.dataset.mode; renderCal(); }));
   el('prevBtn').addEventListener('click',()=>shiftAnchor(-1));
